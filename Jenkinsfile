@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub')   // Add Docker Hub credentials in Jenkins
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')   // Add Docker Hub credentials in Jenkins
         IMAGE_NAME = "srinayana20/flask-docker"         // Replace with your Docker Hub repo name
         IMAGE_TAG = "latest"
     }
@@ -41,15 +41,24 @@ pipeline {
         }
 
         stage('Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    echo "Logging in and pushing Docker image..."
-                    bat "docker login -u ${DOCKERHUB_CREDENTIALS_USR} -p ${DOCKERHUB_CREDENTIALS_PSW}"
-                    bat "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-                    bat "docker logout"
-                }
+          steps {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-creds',
+                                      usernameVariable: 'DOCKER_USER',
+                                      passwordVariable: 'DOCKER_PSW')]) {
+                  bat """
+                    echo Logging in to Docker Hub...
+                    echo %DOCKER_PSW% | docker login --username %DOCKER_USER% --password-stdin
+            
+                    echo Pushing image ${IMAGE_NAME}:${IMAGE_TAG} ...
+                    docker push ${IMAGE_NAME}:${IMAGE_TAG}
+            
+                    echo Logging out...
+                    docker logout
+                  """
             }
+          }
         }
+
     }
 
     post {
