@@ -16,19 +16,18 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps {
-                bat '''
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                '''
-            }
+          steps {
+            bat '''
+              python -m pip install --upgrade pip || py -3 -m pip install --upgrade pip
+              python -m pip install -r requirements.txt || py -3 -m pip install -r requirements.txt
+            '''
+          }
         }
-
+        
         stage('Run Tests') {
-            steps {
-                echo 'Running basic test...'
-                bat 'python -m py_compile app.py'  // Simple syntax check for demo
-            }
+          steps {
+            bat 'python -m py_compile app.py || py -3 -m py_compile app.py'
+          }
         }
 
         stage('Build Docker Image') {
