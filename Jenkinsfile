@@ -5,7 +5,10 @@ pipeline {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')   // Add Docker Hub credentials in Jenkins
         IMAGE_NAME = "srinayana20/flask-docker"         // Replace with your Docker Hub repo name
         IMAGE_TAG = "latest"
+        PYTHON = 'C:\\Users\\manda\\AppData\\Local\\Programs\\Python\\Python312'
+        PATH = "${PYTHON};${PYTHON}\\Scripts;${env.PATH}"
     }
+
 
     stages {
 
@@ -17,18 +20,21 @@ pipeline {
 
         stage('Install Dependencies') {
           steps {
-            bat '''
-              python -m pip install --upgrade pip || py -3 -m pip install --upgrade pip
-              python -m pip install -r requirements.txt || py -3 -m pip install -r requirements.txt
-            '''
+            bat """
+              "%PYTHON%\\python.exe" -m pip install --upgrade pip
+              "%PYTHON%\\python.exe" -m pip install -r requirements.txt
+            """
           }
         }
         
         stage('Run Tests') {
           steps {
-            bat 'python -m py_compile app.py || py -3 -m py_compile app.py'
+            bat """
+              "%PYTHON%\\python.exe" -m py_compile app.py
+            """
           }
         }
+
 
         stage('Build Docker Image') {
             steps {
